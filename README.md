@@ -29,7 +29,7 @@
 
     sentence_word_dict = build_sentence_word_dict(word_dict=user_word_dict)
 
-    # 支持模糊拼音，南方的朋友有福了  fuzzy表示是否支持模糊拼音
+    # 支持模糊拼音，南方的朋友有福了  fuzzy表示是否支持模糊拼音，可以支持部分错别字的修正。
     sentence_word_dict = build_sentence_word_dict(
         word_dict=user_word_dict, fuzzy=True)
 

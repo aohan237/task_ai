@@ -12,7 +12,7 @@ sentent_intent_tpl = {
 
 # # 建立模型
 # sentence_word_dict = build_sentence_word_dict(word_dict=user_word_dict)
-# 支持模糊拼音，南方的朋友有福了
+# 支持模糊拼音，南方的朋友有福了，可以支持部分错别字的修正。
 sentence_word_dict = build_sentence_word_dict(
     word_dict=user_word_dict, fuzzy=True)
 

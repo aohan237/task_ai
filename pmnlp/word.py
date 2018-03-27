@@ -1,16 +1,20 @@
 import re
+from pypinyin import lazy_pinyin
 
 
 class WordTrie:
-    def __init__(self):
+    def __init__(self, fuzzy=True):
         # 初始化词表。
         self.root = dict()
+        self.origin_words = set()
+        self.fuzzy = fuzzy
 
     def __repr__(self):
         # console的字符串显示。
         return str(self.root)
 
     def insert(self, string):
+        self.origin_words.add(string)
         # 添加词语到此词表中。
         index, node = self.findLastNode(string)
         if 're' in string:
@@ -23,6 +27,40 @@ class WordTrie:
                 new_node = dict()
                 node[char] = new_node
                 node = new_node
+
+    def replace_with_right(self, word):
+        word_pinyin = ','.join(lazy_pinyin(word))
+        word_pinyin_fuzzy = self.fuzzy_pinyin(word_pinyin)
+        for i in self.origin_words:
+            tmp_i = ','.join(lazy_pinyin(i))
+            if tmp_i in word_pinyin_fuzzy:
+                return i
+
+    def fuzzy_pinyin(self, pinyin_string, fuzzy_dict=None):
+        if fuzzy_dict is None:
+            fuzzy_dict = {
+                'z': 'zh',
+                's': 'sh',
+                'c': 'ch',
+                'an': 'ang',
+                'in': 'ing',
+                'l': 'n',
+                'n': 'l',
+                'f': 'h',
+                'h': 'f',
+                'r': 'l',
+                'k': 'g',
+                'g': 'k',
+                'ian': 'iang',
+                'uan': 'uang'
+            }
+        result = set({pinyin_string})
+        for key, value in fuzzy_dict.items():
+            tmp_string = re.sub(key, value, pinyin_string)
+            result.add(tmp_string)
+            tmp_string = re.sub(value, key, pinyin_string)
+            result.add(tmp_string)
+        return result
 
     def sep(self, string, build=None):
         # 用于分割字符串，然后进行字符串的操作。
@@ -63,19 +101,32 @@ class WordTrie:
                 if char in node:
                     node = node[char]
                 else:
-                    break
+                    if self.fuzzy:
+                        matched = False
+                        char_pinyin = lazy_pinyin(char)[0]
+                        char_pinyin_set = self.fuzzy_pinyin(char_pinyin)
+                        for key in node.keys():
+                            key_pinyin = lazy_pinyin(key)[0]
+                            if key_pinyin in char_pinyin_set:
+                                node = node[key]
+                                matched = True
+                                break
+                        if not matched:
+                            break
+                    else:
+                        break
                 index += 1
         return (index, node)
 
 
-def build_sentence_word_dict(word_dict=None):
+def build_sentence_word_dict(word_dict=None, fuzzy=True):
     if word_dict is None:
         word_dict = {}
     if not (word_dict and isinstance(word_dict, dict)):
         raise Exception('word_dict must be dict')
     sentence_word_dict = {}
     for k, v in word_dict.items():
-        tmp_trie = WordTrie()
+        tmp_trie = WordTrie(fuzzy=fuzzy)
         for i in v:
             tmp_trie.insert(i)
         sentence_word_dict[k] = tmp_trie

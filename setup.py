@@ -4,7 +4,7 @@ import sys
 from setuptools import setup, find_packages
 
 
-install_requires = ['re']
+install_requires = ['re', 'pypinyin']
 
 PY_VER = sys.version_info
 

@@ -135,6 +135,7 @@ class SentenceTplTrie:
             print('\nword_dict:', v, string, k)
             word, _ = v.sep(string, build=build)
             if word:
+                word = v.replace_with_right(word)
                 print('\nword_dict:', string, k, word)
                 return k, word
             else:
